@@ -80,19 +80,14 @@ namespace AppDesktop.ViewModel
         private ICommand _cmdCrearArchivos;
 
         public ICommand CmdSeleccionarArchivo => _cmdSeleccionarArchivo ??= new DelegateCommand(SelectedFile);
-        public ICommand CmdMigrarDatos => _cmdMigrarDatos ??= new DelegateCommand(ExecuteExportData);
+        public ICommand CmdMigrarDatos => _cmdMigrarDatos ??= new DelegateCommand(ExecuteExportData, CanExecuteExportData);
         public ICommand CmdGenerarArchivos => _cmdGenerarArchivos ??= new DelegateCommand(GenerarArchivo);
-        public ICommand CmdCrearArchivos => _cmdCrearArchivos ??= new DelegateCommand(ExecuteCreateFiles);
+        public ICommand CmdCrearArchivos => _cmdCrearArchivos ??= new DelegateCommand(ExecuteCreateFiles, CanExecuteCreateFiles);
 
         public MainViewModel()
         {
             isPadronDetalle=true;
             VerificarArchivos();
-        }
-
-        private bool CanExecuteExportData()
-        {
-            throw new NotImplementedException();
         }
 
         private void SelectedFile()
@@ -102,6 +97,14 @@ namespace AppDesktop.ViewModel
 
             if (openFileDialog.ShowDialog() == true)
                 textoArchivo = openFileDialog.FileName;
+        }
+
+        private bool CanExecuteExportData()
+        {
+            if (ListadoArchivos==null) return false;
+            if (ListadoArchivos.Count==0) return false;
+
+            return true;
         }
 
         private void ExecuteExportData()
@@ -285,7 +288,11 @@ namespace AppDesktop.ViewModel
                     file.WriteLine(string.Concat(item.Cui, CaracterSeparador, item.DatosCompletos));
                 }
             }
+        }
 
+        private bool CanExecuteCreateFiles()
+        {
+            return !string.IsNullOrEmpty(textoArchivo);
         }
 
         private async void ExecuteCreateFiles()
@@ -342,7 +349,6 @@ namespace AppDesktop.ViewModel
                     }
 
                     VerificarArchivos();
-
                 });
             }
             catch (Exception error)
